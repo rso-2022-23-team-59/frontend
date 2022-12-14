@@ -26,7 +26,7 @@
 
     </v-app-bar>
 
-    <v-main>
+    <v-main class="gray-background pb-5">
       <v-container>
         <Product></Product>
       </v-container>
@@ -46,6 +46,7 @@ export default {
 
 </script>
 <style> 
-
-
+.gray-background {
+  background-color: #f2f2f2;
+}
 </style>
