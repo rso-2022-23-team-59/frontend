@@ -28,23 +28,13 @@
 
     <v-main class="gray-background pb-5">
       <v-container>
-        <Product></Product>
+        <router-view></router-view>
       </v-container>
     </v-main>
   </v-app>
 
 </template>
-<script>
-import Product from './components/Product.vue';
 
-export default {
-  components: {
-    Product
-  }
-
-}
-
-</script>
 <style> 
 .gray-background {
   background-color: #f2f2f2;

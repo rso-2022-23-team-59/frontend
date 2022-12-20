@@ -10,31 +10,19 @@
         <v-row>
             <template v-for="(product, i) in products" :key="i">
                 <v-col class="d-flex child-flex" cols="3">
-                    <v-hover v-slot="{ isHovering, props }">
-                        <v-card
-                            class="product"
-                            :elevation="isHovering ? 8 : 0"
-                            :class="{ 'on-hover': isHovering }"
-                            v-bind="props"
-                        >
-                                <v-img :src="product.image" aspect-ratio="1" class="grey lighten-2 mb-2" />
-                                <div>{{ product.name }}</div>
-                        </v-card>
-                    </v-hover>
+                    <ProductCard :product="product" :index="i" />
                 </v-col>
             </template>
         </v-row>
 
     </div>
 </template>
-  
+
 <script>
+import ProductCard from '@/components/ProductCard.vue';
 import axios from 'axios';
 
 export default {
-    props: {
-        msg: String,
-    },
     data() {
         return {
             products: []
@@ -43,7 +31,6 @@ export default {
     methods: {
         getProducts() {
             axios.get("http://127.0.0.1:8080/v1/products").then((response) => {
-
                 this.products = response.data
             })
 
@@ -51,15 +38,9 @@ export default {
     },
     mounted() {
         this.getProducts();
+    },
+    components: {
+        ProductCard
     }
 };
 </script>
-
-<style scoped>
-.product {
-    background-color: white;
-    border-radius: 0.5rem;
-    padding: 2em;
-}
-</style>
-  
