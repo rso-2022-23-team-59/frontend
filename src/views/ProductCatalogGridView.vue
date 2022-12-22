@@ -30,7 +30,7 @@ export default {
     },
     methods: {
         getProducts() {
-            axios.get("http://127.0.0.1:8080/v1/products").then((response) => {
+            axios.get(`${BASE_URL_PRODUCTS}/products/`).then((response) => {
                 this.products = response.data
             })
 
