@@ -20,6 +20,7 @@
 
 <script>
 import ProductCard from '@/components/ProductCard.vue';
+import { BASE_URL_PRODUCTS } from "@/utils/constants.js"
 import axios from 'axios';
 
 export default {
