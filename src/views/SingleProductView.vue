@@ -86,7 +86,15 @@ export default {
               this.product = response.data;
           })
 
-          axios.get(`${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`).then((response) => {
+          // TODO: Improve this URL generation.
+          var productsUrl = '';
+          if (this.selectedCurrency != 'EUR') {
+            productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?currency=${this.selectedCurrency}&filter=product.id:EQ:${this.productId}`;
+          } else {
+            productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`;
+          }
+
+          axios.get(productsUrl).then((response) => {
               this.productPrices = response.data;
               this.cheapestProduct = this.lowestPriceStore();
           })
@@ -107,6 +115,7 @@ export default {
   mounted() {
       this.getProduct();
   },
+  inject: ['selectedCurrency'],
   components: {
       ProductCard
   }

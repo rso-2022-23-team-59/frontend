@@ -14,6 +14,29 @@
 
       <v-divider class="mx-4" vertical></v-divider>
 
+      <div class="text-center">
+
+        <v-menu offset-y>
+          <template v-slot:activator="{ props }">
+            <v-btn prepend-icon="mdi-cash" v-bind="props">
+              {{ selectedCurrency }}
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              v-for="(currency, index) in currencies"
+              :key="index"
+              :value="index"
+              @click="selectedCurrency = currency"  
+            >
+              <v-list-item-title>{{ currency }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
+
+      <v-divider class="mx-4" vertical></v-divider>
+
       <v-btn icon>
         <v-icon>mdi-heart</v-icon>
       </v-btn>
@@ -35,7 +58,48 @@
 
 </template>
 
-<style> 
+<script>
+import axios from 'axios';
+import { computed } from 'vue'
+
+export default {
+  data() {
+    return {
+      selectedCurrency: "EUR",
+      currencies: ["EUR"],
+    };
+  },
+  methods: {
+    loadCurrencies() {
+      const options = {
+        method: 'GET',
+        url: 'https://currency-exchange.p.rapidapi.com/listquotes',
+        headers: {
+          'X-RapidAPI-Key': 'ca6ab8fbc2mshd8441de3eb09c6cp1d3122jsnfb158a4954a9',
+          'X-RapidAPI-Host': 'currency-exchange.p.rapidapi.com'
+        }
+      };
+
+      axios.request(options).then((response) => {
+        this.currencies = response.data;
+      });
+    },
+    getSelectedCurrency() {
+      return this.selectedCurrency;
+    },
+  },
+  mounted() {
+    this.loadCurrencies();
+  },
+  provide() {
+    return {
+      selectedCurrency: computed(() => this.selectedCurrency),
+    }
+  }
+}
+</script>
+
+<style>
 .gray-background {
   background-color: #f2f2f2;
 }

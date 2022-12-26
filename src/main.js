@@ -17,4 +17,9 @@ const vuetify = createVuetify({
   directives,
 })
 
-createApp(App).use(store).use(router).use(vuetify).use(VueAxios, axios).mount("#app");
+let app = createApp(App);
+
+app.use(store).use(router).use(vuetify).use(VueAxios, axios).mount("#app");
+
+// Make sure we can use dependency injection.
+app.config.unwrapInjectedRef = true;
