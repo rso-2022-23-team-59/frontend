@@ -112,6 +112,12 @@ export default {
         return cheapestProduct;
       }
   },
+  watch: {
+    // Every time the currency changes, update product prices.
+    selectedCurrency(newCurrency, oldCurrency) {
+      this.getProduct();
+    }
+  },
   mounted() {
       this.getProduct();
   },
