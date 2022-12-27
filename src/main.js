@@ -11,15 +11,22 @@ import * as directives from 'vuetify/directives'
 
 import axios from "axios";
 import VueAxios from "vue-axios";
+import VueApexCharts from "vue3-apexcharts";
 
 const vuetify = createVuetify({
   components,
   directives,
-})
+});
 
 let app = createApp(App);
 
-app.use(store).use(router).use(vuetify).use(VueAxios, axios).mount("#app");
+app
+  .use(store)
+  .use(router)
+  .use(vuetify)
+  .use(VueAxios, axios)
+  .use(VueApexCharts)
+  .mount("#app");
 
 // Make sure we can use dependency injection.
 app.config.unwrapInjectedRef = true;
