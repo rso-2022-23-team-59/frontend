@@ -57,10 +57,13 @@
                             <thead>
                                 <tr>
                                     <th class="text-left">
-                                        Store id
+                                        Trgovina
                                     </th>
                                     <th class="text-left">
-                                        Price
+                                        Cena
+                                    </th>
+                                    <th class="text-left">
+                                        Zadnja posodobitev
                                     </th>
                                 </tr>
                             </thead>
@@ -68,6 +71,7 @@
                                 <tr v-for="item in productPrices" :key="item.storeId">
                                     <td>{{ item.storeId }}</td>
                                     <td>{{ formatPrice(item.price) }} {{ item.currency }}</td>
+                                    <td class="timestamp">{{ formatDate(item.timestamp) }}</td>
                                 </tr>
                             </tbody>
                         </template>
@@ -84,7 +88,8 @@
 <script>
 import ProductCard from '@/components/ProductCard.vue';
 import axios from 'axios';
-import { BASE_URL_PRODUCTS } from "@/utils/constants.js"
+import moment from "moment/moment";
+import { BASE_URL_PRODUCTS } from "@/utils/constants.js";
 export default {
     data() {
         return {
@@ -101,12 +106,9 @@ export default {
                 this.product = response.data;
             })
 
-            // TODO: Improve this URL generation.
-            var productsUrl = '';
+            var productsUrl = `${BASE_URL_PRODUCTS}/product-stores/${this.productId}/prices`;
             if (this.selectedCurrency != 'EUR') {
-                productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?currency=${this.selectedCurrency}&filter=product.id:EQ:${this.productId}`;
-            } else {
-                productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`;
+                productsUrl += `?currency=${this.selectedCurrency}`;
             }
 
             axios.get(productsUrl).then((response) => {
@@ -129,6 +131,9 @@ export default {
         formatPrice(price) {
             return parseFloat(price).toFixed(2);
         },
+        formatDate(date) {
+            return moment(date).fromNow();
+        }
     },
     watch: {
         // Every time the currency changes, update product prices.
@@ -168,5 +173,10 @@ export default {
 .best-offer .price {
     font-size: 1.7rem;
     font-weight: bold;
+}
+
+.timestamp {
+    font-size: 0.8em !important;
+    color: grey;
 }
 </style>
