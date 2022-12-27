@@ -16,7 +16,8 @@
 
                         <div v-if="cheapestProduct" class="best-offer-container">
                             <div class="best-offer">
-                                <div class="price">{{ formatPrice(cheapestProduct.price) }} {{ cheapestProduct.currency }}</div>
+                                <div class="price">{{ formatPrice(cheapestProduct.price) }} {{ cheapestProduct.currency
+}}</div>
                                 <div>Najboljša cena</div>
                             </div>
                         </div>
@@ -40,7 +41,7 @@
         </v-row>
 
         <div class="mt-5 pt-5">
-            
+
             <!-- Divider -->
             <div class="text-center d-flex justify-center align-center">
                 <v-divider length="200" class="d-inline"></v-divider>
@@ -82,6 +83,25 @@
             </v-row>
         </div>
 
+
+        <div class="mt-5 pt-5" v-if="allPrices">
+
+            <!-- Divider -->
+            <div class="text-center d-flex justify-center align-center">
+                <v-divider length="200" class="d-inline"></v-divider>
+                <h3 class="mx-5 px-5">Zgodovina cen</h3>
+                <v-divider length="200" class="d-inline"></v-divider>
+            </div>
+
+            <!-- Chart of prices in different stores -->
+            <v-row class="mt-5 mb-5">
+                <v-col offset="3" cols="6">
+                    <apexchart width="100%" type="line" :options="chartOptions" :series="series"></apexchart>
+                </v-col>
+            </v-row>
+        </div>
+
+
     </div>
 </template>
 
@@ -90,6 +110,7 @@ import ProductCard from '@/components/ProductCard.vue';
 import axios from 'axios';
 import moment from "moment/moment";
 import { BASE_URL_PRODUCTS } from "@/utils/constants.js";
+
 export default {
     data() {
         return {
@@ -98,6 +119,18 @@ export default {
             latestPrices: null,
             cheapestProduct: null,
             allPrices: null,
+            chartOptions: {
+                stroke: {
+                    curve: 'stepline',
+                },
+                xaxis: {
+                    type: 'datetime'
+                },
+                markers: {
+                    size: 6,
+                }
+            },
+            series: [],
         }
     },
     methods: {
@@ -111,13 +144,13 @@ export default {
             this.getLatestPrices();
             this.getAllPrices();
         },
-        
+
         getProductInformation() {
             axios.get(`${BASE_URL_PRODUCTS}/products/${this.productId}`).then((response) => {
                 this.product = response.data;
             });
         },
-        
+
         getLatestPrices() {
             var productsUrl = `${BASE_URL_PRODUCTS}/product-stores/${this.productId}/prices`;
             if (this.selectedCurrency != 'EUR') {
@@ -138,7 +171,31 @@ export default {
 
             axios.get(productsUrl).then((response) => {
                 this.allPrices = response.data;
+                this.series = this.computeChartData(response.data);
             });
+        },
+
+        computeChartData(productPrices) {
+            let series = {};
+
+            for (let i = 0; i < productPrices.length; i++) {
+                let productPrice = productPrices[i];
+                if (!series.hasOwnProperty(productPrice.storeId)) {
+                    series[productPrice.storeId] = {
+                        name: `Store ${productPrice.storeId}`,
+                        data: []
+                    };
+                }
+
+                let unixTimestamp = moment(productPrice.timestamp).valueOf();
+
+                series[productPrice.storeId].data.push({
+                    x: unixTimestamp,
+                    y: productPrice.price
+                });
+            }
+
+            return Object.values(series);
         },
 
         computeLowestPrice() {
