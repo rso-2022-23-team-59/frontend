@@ -164,10 +164,9 @@ export default {
         },
 
         getAllPrices() {
-            let productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`;
-            if (this.selectedCurrency != 'EUR') {
-                productsUrl += `?currency=${this.selectedCurrency}`;
-            }
+            let productsUrl = (this.selectedCurrency == 'EUR')
+                ? `${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`
+                : `${BASE_URL_PRODUCTS}/product-stores/?currency=${this.selectedCurrency}&filter=product.id:EQ:${this.productId}`;
 
             axios.get(productsUrl).then((response) => {
                 this.allPrices = response.data;
@@ -177,6 +176,8 @@ export default {
 
         computeChartData(productPrices) {
             let series = {};
+
+            let lastTimestamp = null;
 
             for (let i = 0; i < productPrices.length; i++) {
                 let productPrice = productPrices[i];
@@ -188,12 +189,25 @@ export default {
                 }
 
                 let unixTimestamp = moment(productPrice.timestamp).valueOf();
+                lastTimestamp = Math.max(lastTimestamp, unixTimestamp);
 
                 series[productPrice.storeId].data.push({
                     x: unixTimestamp,
                     y: productPrice.price
                 });
             }
+
+            if (lastTimestamp != null) {
+                for (const [key, value] of Object.entries(series)) {
+                    if (value.data.length <= 0) continue;
+                    let lastItem = value.data[value.data.length - 1];
+                    value.data.push({
+                        x: lastTimestamp,
+                        y: lastItem.y,
+                    });
+                }
+            }
+            
 
             return Object.values(series);
         },
