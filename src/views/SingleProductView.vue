@@ -68,7 +68,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in productPrices" :key="item.storeId">
+                                <tr v-for="item in latestPrices" :key="item.storeId">
                                     <td>{{ item.storeId }}</td>
                                     <td>{{ formatPrice(item.price) }} {{ item.currency }}</td>
                                     <td class="timestamp">{{ formatDate(item.timestamp) }}</td>
@@ -95,59 +95,89 @@ export default {
         return {
             productId: this.$route.params.id,
             product: null,
-            productPrices: null,
+            latestPrices: null,
             cheapestProduct: null,
+            allPrices: null,
         }
     },
     methods: {
-        getProduct() {
 
+        updateAll() {
+            this.getProductInformation();
+            this.updatePrices();
+        },
+
+        updatePrices() {
+            this.getLatestPrices();
+            this.getAllPrices();
+        },
+        
+        getProductInformation() {
             axios.get(`${BASE_URL_PRODUCTS}/products/${this.productId}`).then((response) => {
                 this.product = response.data;
-            })
-
+            });
+        },
+        
+        getLatestPrices() {
             var productsUrl = `${BASE_URL_PRODUCTS}/product-stores/${this.productId}/prices`;
             if (this.selectedCurrency != 'EUR') {
                 productsUrl += `?currency=${this.selectedCurrency}`;
             }
 
             axios.get(productsUrl).then((response) => {
-                this.productPrices = response.data;
-                this.cheapestProduct = this.lowestPriceStore();
-            })
-
+                this.latestPrices = response.data;
+                this.cheapestProduct = this.computeLowestPrice();
+            });
         },
-        lowestPriceStore() {
-            if (this.productPrices == null) return null;
-            if (this.productPrices.length <= 0) return null;
-            let cheapestProduct = this.productPrices[0];
-            for (let i = 1; i < this.productPrices.length; i++) {
-                if (this.productPrices[i].price < cheapestProduct.price) {
-                    cheapestProduct = this.productPrices[i];
+
+        getAllPrices() {
+            let productsUrl = `${BASE_URL_PRODUCTS}/product-stores/?filter=product.id:EQ:${this.productId}`;
+            if (this.selectedCurrency != 'EUR') {
+                productsUrl += `?currency=${this.selectedCurrency}`;
+            }
+
+            axios.get(productsUrl).then((response) => {
+                this.allPrices = response.data;
+            });
+        },
+
+        computeLowestPrice() {
+            if (this.latestPrices == null) return null;
+            if (this.latestPrices.length <= 0) return null;
+            let cheapestProduct = this.latestPrices[0];
+            for (let i = 1; i < this.latestPrices.length; i++) {
+                if (this.latestPrices[i].price < cheapestProduct.price) {
+                    cheapestProduct = this.latestPrices[i];
                 }
             }
             return cheapestProduct;
         },
+
         formatPrice(price) {
             return parseFloat(price).toFixed(2);
         },
+
         formatDate(date) {
             return moment(date).fromNow();
         }
+
     },
+
     watch: {
-        // Every time the currency changes, update product prices.
         selectedCurrency(newCurrency, oldCurrency) {
-            this.getProduct();
+            // Every time the currency changes, update prices. We don't need to
+            // update product information, since it doesn't have any pricing
+            // info.
+            this.updatePrices();
         }
     },
+
     mounted() {
-        this.getProduct();
+        // Load all product information from backend.
+        this.updateAll();
     },
     inject: ['selectedCurrency'],
-    components: {
-        ProductCard
-    }
+    components: { ProductCard }
 };
 </script>
 
