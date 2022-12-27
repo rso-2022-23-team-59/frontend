@@ -16,7 +16,7 @@
 
                         <div v-if="cheapestProduct" class="best-offer-container">
                             <div class="best-offer">
-                                <div class="price">{{ cheapestProduct.price }} {{ cheapestProduct.currency }}</div>
+                                <div class="price">{{ formatPrice(cheapestProduct.price) }} {{ cheapestProduct.currency }}</div>
                                 <div>Najboljša cena</div>
                             </div>
                         </div>
@@ -67,7 +67,7 @@
                             <tbody>
                                 <tr v-for="item in productPrices" :key="item.storeId">
                                     <td>{{ item.storeId }}</td>
-                                    <td>{{ item.price }} {{ item.currency }}</td>
+                                    <td>{{ formatPrice(item.price) }} {{ item.currency }}</td>
                                 </tr>
                             </tbody>
                         </template>
@@ -125,7 +125,10 @@ export default {
                 }
             }
             return cheapestProduct;
-        }
+        },
+        formatPrice(price) {
+            return parseFloat(price).toFixed(2);
+        },
     },
     watch: {
         // Every time the currency changes, update product prices.
