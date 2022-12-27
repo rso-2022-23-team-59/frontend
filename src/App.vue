@@ -3,7 +3,7 @@
 
     <v-app-bar elevation="0" color="deep-purple accent-4" dark>
 
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon icon="mdi-arrow-left" @click="$router.back()"/>
       <v-toolbar-title>Price comparison</v-toolbar-title>
 
       <v-spacer></v-spacer>
