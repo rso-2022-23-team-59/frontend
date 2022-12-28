@@ -9,17 +9,28 @@ export default {
         };
     },
     methods: {
-        getProducts() {
-            axios.get(`${BASE_URL_PRODUCTS}/products/`).then((response) => {
+        getShoppingCart(shoppingCartId) {
+            axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`).then((response) => {
                 console.log(response.data);
                 this.items = response.data;
-            })
-
+            });
         },
+        loadShoppingCartData() {
+            this.getShoppingCart(this.shoppingCartId);
+        }
+    },
+    watch: {
+        shoppingCartId(newId, oldId) {
+            // Reload shopping cart data
+            this.loadShoppingCartData();
+        }
     },
     mounted() {
-        this.getProducts();
+        if (this.shoppingCartId != null) {
+            this.loadShoppingCartData();
+        }
     },
+    inject: ['shoppingCartId'],
 };
 </script>
 

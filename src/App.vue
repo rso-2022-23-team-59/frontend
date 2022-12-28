@@ -67,6 +67,7 @@ export default {
     return {
       selectedCurrency: "EUR",
       currencies: ["EUR"],
+      shoppingCartId: null,
     };
   },
   methods: {
@@ -87,13 +88,24 @@ export default {
     getSelectedCurrency() {
       return this.selectedCurrency;
     },
+    createShoppingCart() {
+      axios.post(`http://localhost:8082/v1/shopping-carts/create`).then((response) => {
+          this.shoppingCartId = response.data.id;
+      });
+    },
   },
   mounted() {
     this.loadCurrencies();
+
+    // If shopping cart has not been loaded yet, create a new one now.
+    if (this.shoppingCartId == null) {
+      this.createShoppingCart();
+    }
   },
   provide() {
     return {
       selectedCurrency: computed(() => this.selectedCurrency),
+      shoppingCartId: computed(() => this.shoppingCartId),
     }
   }
 }

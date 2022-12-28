@@ -32,7 +32,7 @@
         <v-row class="mb-5">
             <v-col offset="2" cols="8">
                 <v-row>
-                    <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-cart" block>Dodaj v
+                    <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-cart" @click="addToCart" block>Dodaj v
                             košarico</v-btn></v-col>
                     <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-heart" block>Dodaj med
                             priljubljene</v-btn></v-col>
@@ -230,6 +230,17 @@ export default {
 
         formatDate(date) {
             return moment(date).fromNow();
+        },
+
+        addToCart() {
+            console.log('Add product ' + this.product.id + ' to cart.');
+            console.log(this.shoppingCartId);
+            axios.put(`http://localhost:8082/v1/shopping-carts/${this.shoppingCartId}`, {
+                productId: this.product.id,
+                quantity: 1
+            }).then((response) => {
+                console.log(response.data);
+            });
         }
 
     },
@@ -247,7 +258,7 @@ export default {
         // Load all product information from backend.
         this.updateAll();
     },
-    inject: ['selectedCurrency'],
+    inject: ['selectedCurrency', 'shoppingCartId'],
     components: { ProductCard }
 };
 </script>
