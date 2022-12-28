@@ -42,7 +42,7 @@
       </v-btn>
 
       <v-badge :content="0" color="red" offset-x="8" offset-y="8" class="mr-5">
-        <v-btn icon>
+        <v-btn @click="$router.push({ name: 'shopping_cart' })" icon>
           <v-icon>mdi-cart</v-icon>
         </v-btn>
       </v-badge>
