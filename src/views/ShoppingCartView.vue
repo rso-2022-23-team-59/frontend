@@ -1,6 +1,5 @@
 <script>
 import axios from 'axios';
-import { BASE_URL_PRODUCTS } from "@/utils/constants.js"
 
 export default {
     data() {
@@ -12,8 +11,8 @@ export default {
     methods: {
         getShoppingCart(shoppingCartId) {
             axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`).then((response) => {
-                console.log(response.data.products);
                 this.items = response.data.products;
+                this.loadShoppingCartPrices();
             });
         },
         updateProductInShoppingCart(shoppingCartId, productId, quantity) {
@@ -21,33 +20,35 @@ export default {
                 productId: productId,
                 quantity: quantity
             }).then((response) => {
-                console.log(response.data.products);
                 this.items = response.data.products;
+                this.loadShoppingCartPrices();
             });
         },
         getShoppingCartPrices(shoppingCartId) {
             axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}/prices`)
                 .then((response) => {
-                    console.log(response.data);
                     this.prices = response.data;
+                    this.loadShoppingCartPrices();
                 });
         },
         changeQuantity(itemId, newQuantity) {
-            console.log("Set quantity for item with id " + itemId + " to " + newQuantity + " in cart with id " + this.shoppingCartId);
             if (this.shoppingCartId != null) {
                 this.updateProductInShoppingCart(this.shoppingCartId, itemId, newQuantity);
             }
         },
         removeFromCart(itemId) {
-            console.log("Remove item with id " + itemId + " from cart with id " + this.shoppingCartId);
             if (this.shoppingCartId != null) {
                 this.updateProductInShoppingCart(this.shoppingCartId, itemId, 0);
+            }
+        },
+        loadShoppingCartPrices() {
+            if (this.shoppingCartId != null) {
+                this.getShoppingCartPrices(this.shoppingCartId);
             }
         },
         loadShoppingCartData() {
             if (this.shoppingCartId != null) {
                 this.getShoppingCart(this.shoppingCartId);
-                this.getShoppingCartPrices(this.shoppingCartId);
             }
         },
     },
@@ -144,7 +145,7 @@ export default {
                                 </td>
                                 <td>{{ item.product.name }}</td>
                                 <td class="price">
-                                    {{ item.price }} {{ item.currency }}
+                                    {{ item.quantity }} x {{ item.price }} {{ item.currency }} = {{ item.totalPrice }} {{ item.currency }}
                                 </td>
                             </tr>
                             <tr v-if="items == null || items.length <= 0">
