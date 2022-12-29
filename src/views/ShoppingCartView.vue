@@ -6,26 +6,7 @@ export default {
     data() {
         return {
             items: [],
-            shops: [
-                {
-                    id: 1,
-                    name: 'Mimovrste',
-                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
-                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg',
-                },
-                {
-                    id: 2,
-                    name: 'Big bang',
-                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
-                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg'
-                },
-                {
-                    id: 3,
-                    name: 'EnaA',
-                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
-                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg'
-                },
-            ],
+            prices: null,
         };
     },
     methods: {
@@ -44,6 +25,13 @@ export default {
                 this.items = response.data.products;
             });
         },
+        getShoppingCartPrices(shoppingCartId) {
+            axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}/prices`)
+                .then((response) => {
+                    console.log(response.data);
+                    this.prices = response.data;
+                });
+        },
         changeQuantity(itemId, newQuantity) {
             console.log("Set quantity for item with id " + itemId + " to " + newQuantity + " in cart with id " + this.shoppingCartId);
             if (this.shoppingCartId != null) {
@@ -59,6 +47,7 @@ export default {
         loadShoppingCartData() {
             if (this.shoppingCartId != null) {
                 this.getShoppingCart(this.shoppingCartId);
+                this.getShoppingCartPrices(this.shoppingCartId);
             }
         },
     },
@@ -125,7 +114,7 @@ export default {
         </v-row>
     </div>
 
-    <div class="mt-5 mb-5">
+    <div class="mt-5 mb-5" v-if="prices">
 
         <div class="text-center d-flex justify-center align-center">
             <v-divider length="200" class="d-inline"></v-divider>
@@ -135,27 +124,27 @@ export default {
 
         <v-row class="mt-5">
             <v-col cols="10" offset="1">
-                <div class="shop" v-for="shop in shops" :key="shop.id">
+                <div class="shop" v-for="entry in prices" :key="entry.store.id">
                     <div class="shop-information d-flex align-center">
                         <div class="image mr-5">
-                            <v-img width="100" :src="shop.image" />
+                            <v-img width="100" :src="entry.store.image" />
                         </div>
                         <div class="information ml-5">
-                            <h4>{{ shop.name }}</h4>
-                            <p class="description">{{ shop.description }}</p>
+                            <h4>{{ entry.store.name }}</h4>
+                            <p class="description">{{ entry.store.description }}</p>
                         </div>
                     </div>
                     <v-table>
                         <tbody>
-                            <tr v-for="item in items" :key="item.id">
+                            <tr v-for="item in entry.prices" :key="item.product.id">
                                 <td>
                                     <div class="product-image">
-                                        <v-img aspect-ratio="1" width="64" :src="item.image" contain />
+                                        <v-img aspect-ratio="1" width="64" :src="item.product.image" contain />
                                     </div>
                                 </td>
-                                <td>{{ item.name }}</td>
-                                <td>
-                                    PRICE
+                                <td>{{ item.product.name }}</td>
+                                <td class="price">
+                                    {{ item.price }} {{ item.currency }}
                                 </td>
                             </tr>
                             <tr v-if="items == null || items.length <= 0">
@@ -163,7 +152,9 @@ export default {
                             </tr>
                             <tr v-else>
                                 <td colspan="2"></td>
-                                <td>TOTAL_PRICE</td>
+                                <td class="price">
+                                    {{ entry.totalPrice }} {{ entry.currency }}
+                                </td>
                             </tr>
                         </tbody>
                     </v-table>
@@ -197,5 +188,10 @@ export default {
 
 .quantity {
     width: 100px;
+}
+
+.price {
+    font-weight: bold;
+    font-size: 1.4em;
 }
 </style>
