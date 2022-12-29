@@ -5,7 +5,27 @@ import { BASE_URL_PRODUCTS } from "@/utils/constants.js"
 export default {
     data() {
         return {
-            items: []
+            items: [],
+            shops: [
+                {
+                    id: 1,
+                    name: 'Mimovrste',
+                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
+                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg',
+                },
+                {
+                    id: 2,
+                    name: 'Big bang',
+                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
+                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg'
+                },
+                {
+                    id: 3,
+                    name: 'EnaA',
+                    description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis dolorem delectus nesciunt eligendi, at nobis dolore voluptates!',
+                    image: 'https://www.mimovrste.com/_nuxt/img/LogoSl10SI.ffbd456.732.svg'
+                },
+            ],
         };
     },
     methods: {
@@ -105,11 +125,58 @@ export default {
         </v-row>
     </div>
 
+    <div class="mt-5 mb-5">
+
+        <div class="text-center d-flex justify-center align-center">
+            <v-divider length="200" class="d-inline"></v-divider>
+            <h3 class="mx-5 px-5">Cena košarice</h3>
+            <v-divider length="200" class="d-inline"></v-divider>
+        </div>
+
+        <v-row class="mt-5">
+            <v-col cols="10" offset="1">
+                <div class="shop" v-for="shop in shops" :key="shop.id">
+                    <div class="shop-information d-flex align-center">
+                        <div class="image mr-5">
+                            <v-img width="100" :src="shop.image" />
+                        </div>
+                        <div class="information ml-5">
+                            <h4>{{ shop.name }}</h4>
+                            <p class="description">{{ shop.description }}</p>
+                        </div>
+                    </div>
+                    <v-table>
+                        <tbody>
+                            <tr v-for="item in items" :key="item.id">
+                                <td>
+                                    <div class="product-image">
+                                        <v-img aspect-ratio="1" width="64" :src="item.image" contain />
+                                    </div>
+                                </td>
+                                <td>{{ item.name }}</td>
+                                <td>
+                                    PRICE
+                                </td>
+                            </tr>
+                            <tr v-if="items == null || items.length <= 0">
+                                <td colspan="4">Nakupovalna košarica je prazna.</td>
+                            </tr>
+                            <tr v-else>
+                                <td colspan="2"></td>
+                                <td>TOTAL_PRICE</td>
+                            </tr>
+                        </tbody>
+                    </v-table>
+                </div>
+            </v-col>
+        </v-row>
+
+    </div>
+
 </template>
 
 <style scoped>
 .shop {
-    padding: 2rem;
     margin-bottom: 2rem;
 }
 
