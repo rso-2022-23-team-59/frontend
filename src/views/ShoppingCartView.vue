@@ -11,13 +11,36 @@ export default {
     methods: {
         getShoppingCart(shoppingCartId) {
             axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`).then((response) => {
-                console.log(response.data);
-                this.items = response.data;
+                console.log(response.data.products);
+                this.items = response.data.products;
             });
         },
+        updateProductInShoppingCart(shoppingCartId, productId, quantity) {
+            axios.put(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`, {
+                productId: productId,
+                quantity: quantity
+            }).then((response) => {
+                console.log(response.data.products);
+                this.items = response.data.products;
+            });
+        },
+        changeQuantity(itemId, newQuantity) {
+            console.log("Set quantity for item with id " + itemId + " to " + newQuantity + " in cart with id " + this.shoppingCartId);
+            if (this.shoppingCartId != null) {
+                this.updateProductInShoppingCart(this.shoppingCartId, itemId, newQuantity);
+            }
+        },
+        removeFromCart(itemId) {
+            console.log("Remove item with id " + itemId + " from cart with id " + this.shoppingCartId);
+            if (this.shoppingCartId != null) {
+                this.updateProductInShoppingCart(this.shoppingCartId, itemId, 0);
+            }
+        },
         loadShoppingCartData() {
-            this.getShoppingCart(this.shoppingCartId);
-        }
+            if (this.shoppingCartId != null) {
+                this.getShoppingCart(this.shoppingCartId);
+            }
+        },
     },
     watch: {
         shoppingCartId(newId, oldId) {
@@ -26,9 +49,7 @@ export default {
         }
     },
     mounted() {
-        if (this.shoppingCartId != null) {
-            this.loadShoppingCartData();
-        }
+        this.loadShoppingCartData();
     },
     inject: ['shoppingCartId'],
 };
@@ -69,19 +90,19 @@ export default {
                                 <td>{{ item.name }}</td>
                                 <td>
                                     <v-text-field
-                                        v-model="numberValue"
                                         type="number"
                                         density="compact"
                                         variant="outlined"
                                         hide-details
                                         single-line
                                         class="quantity"
-                                        value="12"
+                                        v-bind:value="item.quantity"
+                                        v-on:input="changeQuantity(item.productId, $event.target.value)"
                                     />
                                 </td>
                                 <td class="text-center price">12€</td>
                                 <td>
-                                    <v-btn variant="flat" icon>
+                                    <v-btn variant="flat" @click="removeFromCart(item.productId)" icon>
                                         <v-icon>mdi-close</v-icon>
                                     </v-btn>
                                 </td>
