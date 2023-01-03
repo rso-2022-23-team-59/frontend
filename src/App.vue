@@ -3,7 +3,7 @@
 
     <v-app-bar elevation="0" color="deep-purple accent-4" dark>
 
-      <v-app-bar-nav-icon icon="mdi-arrow-left" @click="$router.back()"/>
+      <v-app-bar-nav-icon icon="mdi-arrow-left" @click="$router.back()" />
       <v-toolbar-title>Price comparison</v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -27,12 +27,14 @@
 
       <v-divider class="mx-4" vertical></v-divider>
 
-      <v-btn icon>
-        <v-icon>mdi-heart</v-icon>
-      </v-btn>
+      <v-badge :content="favorites.products.length" color="red" offset-x="8" offset-y="8" class="mr-5">
+        <v-btn @click="$router.push({ name: 'shopping_cart', query: { cart: 'favorites' } })" icon>
+          <v-icon>mdi-heart</v-icon>
+        </v-btn>
+      </v-badge>
 
       <v-badge :content="shoppingCart.products.length" color="red" offset-x="8" offset-y="8" class="mr-5">
-        <v-btn @click="$router.push({ name: 'shopping_cart' })" icon>
+        <v-btn @click="$router.push({ name: 'shopping_cart', query: { cart: 'shopping-cart' } })" icon>
           <v-icon>mdi-cart</v-icon>
         </v-btn>
       </v-badge>
@@ -81,6 +83,11 @@ export default {
         products: [],
         prices: null,
       },
+      favorites: {
+        id: null,
+        products: [],
+        prices: null,
+      },
 
       items: [
         { title: 'Uredi trgovine', toUrl: { name: 'manageStores' } },
@@ -108,55 +115,95 @@ export default {
       return this.selectedCurrency;
     },
 
-    createShoppingCart() {
+    createShoppingCart(shoppingCartType) {
       axios.post(`${BASE_URL_CART}/shopping-carts/create`).then((response) => {
-        this.shoppingCart.id = response.data.id;
+        this.updateCartId(shoppingCartType, response.data);
       });
     },
-    getShoppingCart(shoppingCartId) {
-      axios.get(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}`).then((response) => {
-        this.shoppingCart.products = response.data.products;
-        this.getShoppingCartPrices(shoppingCartId);
+    getShoppingCart(shoppingCartType) {
+      let cart = this.getShoppingCartByType(shoppingCartType);
+      axios.get(`${BASE_URL_CART}/shopping-carts/${cart.id}`).then((response) => {
+        this.updateCartProducts(shoppingCartType, response.data);
+        this.getShoppingCartPrices(shoppingCartType);
       });
     },
-    updateProductInShoppingCart(shoppingCartId, productId, quantity) {
-      axios.put(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}`, {
+    updateProductInShoppingCart(shoppingCartType, productId, quantity) {
+      let cart = this.getShoppingCartByType(shoppingCartType);
+      axios.put(`${BASE_URL_CART}/shopping-carts/${cart.id}`, {
         productId: productId,
         quantity: quantity
       }).then((response) => {
-        this.shoppingCart.products = response.data.products;
-        this.getShoppingCartPrices(shoppingCartId);
+        this.updateCartProducts(shoppingCartType, response.data);
+        this.getShoppingCartPrices(shoppingCartType);
       });
     },
-    getShoppingCartPrices(shoppingCartId) {
-      axios.get(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}/prices`)
+    getShoppingCartPrices(shoppingCartType) {
+      let cart = this.getShoppingCartByType(shoppingCartType);
+      axios.get(`${BASE_URL_CART}/shopping-carts/${cart.id}/prices`)
         .then((response) => {
-          this.shoppingCart.prices = response.data;
-          this.shoppingCart = this.shoppingCart;
+          this.updateCartPrices(shoppingCartType, response.data);
         });
+    },
+
+    updateCartProducts(cartType, data) {
+      if (cartType == 'favorites') {
+        this.favorites.products = data.products;
+      } else {
+        this.shoppingCart.products = data.products;
+      }
+      this.emitter.emit("shopping-cart-changed");
+    },
+
+    updateCartId(cartType, data) {
+      if (cartType == 'favorites') {
+        this.favorites.id = data.id;
+      } else {
+        this.shoppingCart.id = data.id;
+      }
+      this.emitter.emit("shopping-cart-changed");
+    },
+
+    updateCartPrices(cartType, data) {
+      if (cartType == 'favorites') {
+        this.favorites.prices = data;
+      } else {
+        this.shoppingCart.prices = data;
+      }
+      this.emitter.emit("shopping-cart-changed");
+    },
+
+    getShoppingCartByType(cartType) {
+      if (cartType == 'favorites') {
+        return this.favorites;
+      } else {
+        return this.shoppingCart;
+      }
     },
 
   },
 
   mounted() {
-    this.emitter.on("add-to-cart", productId => {
-      this.updateProductInShoppingCart(this.shoppingCart.id, productId, 1);
-    });
     this.emitter.on("update-cart-product", data => {
-      this.updateProductInShoppingCart(this.shoppingCart.id, data.productId, data.quantity);
+      this.updateProductInShoppingCart(data.cart, data.productId, data.quantity);
     });
 
     this.loadCurrencies();
 
     // If shopping cart has not been loaded yet, create a new one now.
-    if (this.shoppingCartId == null) {
-      this.createShoppingCart();
+    if (this.shoppingCart.id == null) {
+      this.createShoppingCart('shopping-cart');
+    }
+    if (this.favorites.id == null) {
+      setTimeout(function () {
+        this.createShoppingCart('favorites');
+      }.bind(this), 1000);
     }
   },
   provide() {
     return {
       selectedCurrency: computed(() => this.selectedCurrency),
       shoppingCart: computed(() => this.shoppingCart),
+      favorites: computed(() => this.favorites),
     }
   }
 }

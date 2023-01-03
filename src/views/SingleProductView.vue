@@ -43,8 +43,17 @@
                                 Dodaj v košarico
                         </v-btn>
                     </v-col>
-                    <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-heart" block>Dodaj med
-                            priljubljene</v-btn></v-col>
+                    <v-col cols="6">
+                        <v-btn
+                            variant="tonal"
+                            color="primary"
+                            append-icon="mdi-heart"
+                            @click="addToFavorites"
+                            block
+                        >
+                            Dodaj med priljubljene
+                        </v-btn>
+                    </v-col>
                 </v-row>
             </v-col>
         </v-row>
@@ -319,7 +328,13 @@ export default {
         addToCart() {
             // Emit an event, that the [App] component will catch and insert
             // this item into the shopping cart.
-            this.emitter.emit("add-to-cart", this.productId);
+            this.emitter.emit("update-cart-product", { cart: "shopping-cart", productId: this.productId, quantity: 1 });
+        },
+
+        addToFavorites() {
+            // Emit an event, that the [App] component will catch and insert
+            // this item into the favorites shopping cart.
+            this.emitter.emit("update-cart-product", { cart: "favorites", productId: this.productId, quantity: 1 });
         },
 
         isInCart() {

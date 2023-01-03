@@ -1,18 +1,45 @@
 <script>
 export default {
+    data() {
+        return {
+            cart: {
+                id: null,
+                products: [],
+                prices: [],
+            },
+            cartType: null,
+        };
+    },
     methods: {
         
         changeQuantity(itemId, newQuantity) {
-            console.log("itemId: " + itemId + ", newQuantity: " + newQuantity);
-            this.emitter.emit("update-cart-product", { productId: itemId, quantity: newQuantity });
+            this.emitter.emit("update-cart-product", { cart: this.cartType, productId: itemId, quantity: newQuantity });
         },
         removeFromCart(itemId) {
-            console.log("itemId: " + itemId);
-            this.emitter.emit("update-cart-product", { productId: itemId, quantity: 0 });
+            this.emitter.emit("update-cart-product", { cart: this.cartType, productId: itemId, quantity: 0 });
         },
+        updateCurrentCart(cartType) {
+            this.cartType = cartType;
+            if (cartType == 'favorites') {
+                Object.assign(this.cart, this.favorites);
+            } else {
+                Object.assign(this.cart, this.shoppingCart);
+            }
+        }
 
     },
-    inject: ['shoppingCart'],
+    mounted() {
+        this.updateCurrentCart(this.$route.query.cart);
+        this.emitter.on("shopping-cart-changed", data => {
+            this.updateCurrentCart(this.$route.query.cart);
+        });
+    },
+    watch: {
+        '$route'(newRoute, oldRoute) {
+            this.updateCurrentCart(this.$route.query.cart);
+        }
+    },
+    inject: ['shoppingCart', 'favorites'],
 };
 </script>
 
@@ -21,7 +48,11 @@ export default {
 
         <div class="text-center d-flex justify-center align-center">
             <v-divider length="200" class="d-inline"></v-divider>
-            <h3 class="mx-5 px-5">Izbrani produkti</h3>
+            
+            <!-- Display different title based on cart type -->
+            <h2 v-if="cartType == 'favorites'" class="mx-5 px-5">Priljubljeni izdelki</h2>
+            <h2 v-else class="mx-5 px-5">Izdelki v košarici</h2>
+            
             <v-divider length="200" class="d-inline"></v-divider>
         </div>
 
@@ -38,7 +69,7 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in shoppingCart.products" :key="item.id">
+                        <tr v-for="item in cart.products" :key="item.id">
                             <td>
                                 <div class="product-image">
                                     <v-img aspect-ratio="1" width="64" :src="item.image" contain />
@@ -56,7 +87,7 @@ export default {
                                 </v-btn>
                             </td>
                         </tr>
-                        <tr v-if="shoppingCart.products == null || shoppingCart.products.length <= 0">
+                        <tr v-if="cart.products == null || cart.products.length <= 0">
                             <td colspan="4">Nakupovalna košarica je prazna.</td>
                         </tr>
                     </tbody>
@@ -66,17 +97,17 @@ export default {
         </v-row>
     </div>
 
-    <div class="mt-5 mb-5" v-if="shoppingCart.prices != null && shoppingCart.prices.length > 0">
+    <div class="mt-5 mb-5" v-if="cart.prices != null && cart.prices.length > 0">
 
         <div class="text-center d-flex justify-center align-center">
             <v-divider length="200" class="d-inline"></v-divider>
-            <h3 class="mx-5 px-5">Cena košarice</h3>
+            <h3 class="mx-5 px-5">Cene izdelkov</h3>
             <v-divider length="200" class="d-inline"></v-divider>
         </div>
 
         <v-row class="mt-5">
             <v-col cols="10" offset="1">
-                <div class="shop" v-for="entry in shoppingCart.prices" :key="entry.store.id">
+                <div class="shop" v-for="entry in cart.prices" :key="entry.store.id">
                     <div class="shop-information d-flex align-center">
                         <div class="image mr-5">
                             <v-img width="100" :src="entry.store.image" />
