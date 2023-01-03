@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import ProductCatalogGridView from "../views/ProductCatalogGridView.vue";
 import SingleProductView from "../views/SingleProductView.vue";
+import ManageStores from "../views/ManageStores.vue";
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: "/product/:id",
     name: "product_detail",
     component: SingleProductView,
+  },
+  {
+    path: "/stores/",
+    name: "manageStores",
+    component: ManageStores,
   },
 ];
 

@@ -47,8 +47,28 @@
         </v-btn>
       </v-badge>
 
-    </v-app-bar>
+      <v-btn icon
+      
+    >
+      <v-icon>mdi-dots-vertical</v-icon>
 
+      <v-menu activator="parent">
+        <v-list>
+          <v-list-item
+            v-for="(item, index) in items"
+            :key="index"
+            :value="index"
+          >
+            <router-link :to="item.toUrl">
+
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </router-link>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-btn>
+      
+    </v-app-bar>
     <v-main class="gray-background pb-5">
       <v-container>
         <router-view></router-view>
@@ -67,6 +87,10 @@ export default {
     return {
       selectedCurrency: "EUR",
       currencies: ["EUR"],
+      items: [
+        { title: 'Manage stores', toUrl: { name: 'manageStores'} },
+
+      ],
     };
   },
   methods: {
