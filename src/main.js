@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import mitt from 'mitt';
 import router from "./router";
 import store from "./store";
 
@@ -18,7 +19,11 @@ const vuetify = createVuetify({
   directives,
 });
 
+// Event bus
+const emitter = mitt();
+
 let app = createApp(App);
+app.config.globalProperties.emitter = emitter;
 
 app
   .use(store)
