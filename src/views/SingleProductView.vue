@@ -100,7 +100,63 @@
                 </v-col>
             </v-row>
         </div>
+        <v-row class="mb-5">
+            <v-col offset="2" cols="8">
+                <v-row>
+                    <v-col cols="12">
+                        <v-card>
+                            <v-card-title>
+                            <span v-if="notificationExists" class="text-h5">Obvestilo nastavljeno</span>
+                            <span v-else class="text-h5">Obvesti me o spremembah cene</span>
 
+                            </v-card-title>
+
+                            <v-card-text>
+                            <v-container>
+                                <v-row>
+                                <v-col
+                                    cols="12"
+                                    sm="6"
+                                    md="4"
+                                >
+                                    <v-text-field
+                                    v-model="editedItem.thresholdPrice"
+                                    label="Spodnja meja cene"
+                                    :disabled="notificationExists"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col
+                                    cols="12"
+                                    sm="6"
+                                    md="4"
+                                >
+                                    <v-text-field
+                                    v-model="editedItem.email"
+                                    label="Email"
+                                    :disabled="notificationExists"
+
+                                    ></v-text-field>
+                                </v-col>
+                                </v-row>
+                            </v-container>
+                            </v-card-text>
+                            <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="addNotification"
+                            >
+                                Dodaj obvestilo
+                            </v-btn>
+                            </v-card-actions>
+
+                        </v-card>
+                    </v-col>
+
+                </v-row>
+            </v-col>
+        </v-row>
 
     </div>
 </template>
@@ -109,7 +165,7 @@
 import ProductCard from '@/components/ProductCard.vue';
 import axios from 'axios';
 import moment from "moment/moment";
-import { BASE_URL_CART, BASE_URL_PRODUCTS } from "@/utils/constants.js";
+import { BASE_URL_CART, BASE_URL_PRODUCTS, BASE_URL_NOTIF } from "@/utils/constants.js";
 
 export default {
     data() {
@@ -131,8 +187,15 @@ export default {
                 }
             },
             series: [],
+            editedItem: {},
+
         }
     },
+    computed:{
+        notificationExists(){
+            return this.editedItem && this.editedItem.id
+        }
+    },  
     methods: {
 
         updateAll() {
@@ -212,6 +275,19 @@ export default {
             return Object.values(series);
         },
 
+        addNotification(){
+            let item = Object.assign({}, this.editedItem)
+            item["productId"] = this.productId
+            item["lastPrice"] = 0
+            axios.post(`${BASE_URL_NOTIF}/notifications/`, item).then((response) => {
+                this.editedItem = response.data
+            })
+        },
+        getExistingNotification(){
+            axios.get(`${BASE_URL_NOTIF}/notifications/?filter=productId:EQ:${this.productId}`).then((response) => {
+                this.editedItem = response.data[0]
+            }).catch((e)=>{})
+        },
         computeLowestPrice() {
             if (this.latestPrices == null) return null;
             if (this.latestPrices.length <= 0) return null;
@@ -259,6 +335,7 @@ export default {
     mounted() {
         // Load all product information from backend.
         this.updateAll();
+        this.getExistingNotification()
     },
     inject: ['selectedCurrency', 'shoppingCartId'],
     components: { ProductCard }
