@@ -8,12 +8,6 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-
-      <v-divider class="mx-4" vertical></v-divider>
-
       <div class="text-center">
 
         <v-menu offset-y>
