@@ -13,7 +13,7 @@ spec:
         app: frontend
     spec:
       containers:
-        - image: metatheory/frontend:2022-12-03-15-23-37
+        - image: metatheory/frontend:latest
           name: frontend
           ports:
             - containerPort: 80
