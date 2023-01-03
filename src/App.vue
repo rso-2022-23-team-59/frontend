@@ -23,12 +23,8 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item
-              v-for="(currency, index) in currencies"
-              :key="index"
-              :value="index"
-              @click="selectedCurrency = currency"  
-            >
+            <v-list-item v-for="(currency, index) in currencies" :key="index" :value="index"
+              @click="selectedCurrency = currency">
               <v-list-item-title>{{ currency }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -41,33 +37,27 @@
         <v-icon>mdi-heart</v-icon>
       </v-btn>
 
-      <v-badge :content="0" color="red" offset-x="8" offset-y="8" class="mr-5">
+      <v-badge :content="shoppingCart.products.length" color="red" offset-x="8" offset-y="8" class="mr-5">
         <v-btn @click="$router.push({ name: 'shopping_cart' })" icon>
           <v-icon>mdi-cart</v-icon>
         </v-btn>
       </v-badge>
 
-      <v-btn icon
-      
-    >
-      <v-icon>mdi-dots-vertical</v-icon>
+      <v-btn icon>
+        <v-icon>mdi-dots-vertical</v-icon>
 
-      <v-menu activator="parent">
-        <v-list>
-          <v-list-item
-            v-for="(item, index) in items"
-            :key="index"
-            :value="index"
-          >
-            <router-link :to="item.toUrl">
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item v-for="(item, index) in items" :key="index" :value="index">
+              <router-link :to="item.toUrl">
 
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </router-link>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-btn>
-      
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </router-link>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-btn>
+
     </v-app-bar>
     <v-main class="gray-background pb-5">
       <v-container>
@@ -86,17 +76,26 @@ import { BASE_URL_CART } from '@/utils/constants';
 export default {
   data() {
     return {
+
+      // Global currency information provided to all children of App object
       selectedCurrency: "EUR",
       currencies: ["EUR"],
-      shoppingCartId: null,
-      items: [
-        { title: 'Uredi trgovine', toUrl: { name: 'manageStores'} },
-        { title: 'Uredi obvestila', toUrl: { name: 'manageNotifications'} },
 
+      // Globally available shopping cart data.
+      shoppingCart: {
+        id: null,
+        products: [],
+        prices: null,
+      },
+
+      items: [
+        { title: 'Uredi trgovine', toUrl: { name: 'manageStores' } },
+        { title: 'Uredi obvestila', toUrl: { name: 'manageNotifications' } },
       ],
     };
   },
   methods: {
+
     loadCurrencies() {
       const options = {
         method: 'GET',
@@ -114,14 +113,45 @@ export default {
     getSelectedCurrency() {
       return this.selectedCurrency;
     },
+
     createShoppingCart() {
-      
-      axios.post(`${BASE_URL_CART}/v1/shopping-carts/create`).then((response) => {
-          this.shoppingCartId = response.data.id;
+      axios.post(`${BASE_URL_CART}/shopping-carts/create`).then((response) => {
+        this.shoppingCart.id = response.data.id;
       });
     },
+    getShoppingCart(shoppingCartId) {
+      axios.get(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}`).then((response) => {
+        this.shoppingCart.products = response.data.products;
+        this.getShoppingCartPrices(shoppingCartId);
+      });
+    },
+    updateProductInShoppingCart(shoppingCartId, productId, quantity) {
+      axios.put(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}`, {
+        productId: productId,
+        quantity: quantity
+      }).then((response) => {
+        this.shoppingCart.products = response.data.products;
+        this.getShoppingCartPrices(shoppingCartId);
+      });
+    },
+    getShoppingCartPrices(shoppingCartId) {
+      axios.get(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}/prices`)
+        .then((response) => {
+          this.shoppingCart.prices = response.data;
+          this.shoppingCart = this.shoppingCart;
+        });
+    },
+
   },
+
   mounted() {
+    this.emitter.on("add-to-cart", productId => {
+      this.updateProductInShoppingCart(this.shoppingCart.id, productId, 1);
+    });
+    this.emitter.on("update-cart-product", data => {
+      this.updateProductInShoppingCart(this.shoppingCart.id, data.productId, data.quantity);
+    });
+
     this.loadCurrencies();
 
     // If shopping cart has not been loaded yet, create a new one now.
@@ -132,7 +162,7 @@ export default {
   provide() {
     return {
       selectedCurrency: computed(() => this.selectedCurrency),
-      shoppingCartId: computed(() => this.shoppingCartId),
+      shoppingCart: computed(() => this.shoppingCart),
     }
   }
 }

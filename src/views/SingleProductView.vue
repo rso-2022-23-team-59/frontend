@@ -32,8 +32,17 @@
         <v-row class="mb-5">
             <v-col offset="2" cols="8">
                 <v-row>
-                    <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-cart" @click="addToCart" block>Dodaj v
-                            košarico</v-btn></v-col>
+                    <v-col cols="6">
+                        <v-btn
+                            variant="tonal"
+                            color="primary"
+                            append-icon="mdi-cart"
+                            @click="addToCart"
+                            block
+                        >
+                                Dodaj v košarico
+                        </v-btn>
+                    </v-col>
                     <v-col cols="6"><v-btn variant="tonal" color="primary" append-icon="mdi-heart" block>Dodaj med
                             priljubljene</v-btn></v-col>
                 </v-row>
@@ -188,7 +197,6 @@ export default {
             },
             series: [],
             editedItem: {},
-
         }
     },
     computed:{
@@ -309,16 +317,19 @@ export default {
         },
 
         addToCart() {
-            
-            console.log('Add product ' + this.product.id + ' to cart.');
-            console.log(this.shoppingCartId);
-            
-            axios.put(`${BASE_URL_CART}/shopping-carts/${this.shoppingCartId}`, {
-                productId: this.product.id,
-                quantity: 1
-            }).then((response) => {
-                console.log(response.data);
-            });
+            // Emit an event, that the [App] component will catch and insert
+            // this item into the shopping cart.
+            this.emitter.emit("add-to-cart", this.productId);
+        },
+
+        isInCart() {
+            if (this.shoppingCart.products != null) {
+                for (let i = 0; i < this.shoppingCart.products.length; i++) {
+                    let product = this.shoppingCart.products[i];
+                    if (product.id === this.productId) return true;
+                }
+            }
+            return false;
         }
 
     },
@@ -329,15 +340,15 @@ export default {
             // update product information, since it doesn't have any pricing
             // info.
             this.updatePrices();
-        }
+        },
     },
 
     mounted() {
         // Load all product information from backend.
         this.updateAll();
-        this.getExistingNotification()
+        this.getExistingNotification();
     },
-    inject: ['selectedCurrency', 'shoppingCartId'],
+    inject: ['selectedCurrency', 'shoppingCart'],
     components: { ProductCard }
 };
 </script>
