@@ -90,7 +90,8 @@ export default {
       currencies: ["EUR"],
       shoppingCartId: null,
       items: [
-        { title: 'Manage stores', toUrl: { name: 'manageStores'} },
+        { title: 'Uredi trgovine', toUrl: { name: 'manageStores'} },
+        { title: 'Uredi obvestila', toUrl: { name: 'manageNotifications'} },
 
       ],
     };

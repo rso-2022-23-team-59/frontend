@@ -3,6 +3,7 @@ import ProductCatalogGridView from "../views/ProductCatalogGridView.vue";
 import SingleProductView from "../views/SingleProductView.vue";
 import ShoppingCartView from "../views/ShoppingCartView.vue";
 import ManageStores from "../views/ManageStores.vue";
+import ManageNotifications from "../views/ManageNotifications.vue";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/stores/",
     name: "manageStores",
     component: ManageStores,
+  },
+  {
+    path: "/notifications/",
+    name: "manageNotifications",
+    component: ManageNotifications,
   },
 ];
 
