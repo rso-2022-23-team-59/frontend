@@ -81,6 +81,7 @@
 <script>
 import axios from 'axios';
 import { computed } from 'vue'
+import { BASE_URL_CART } from '@/utils/constants';
 
 export default {
   data() {
@@ -113,7 +114,8 @@ export default {
       return this.selectedCurrency;
     },
     createShoppingCart() {
-      axios.post(`http://localhost:8082/v1/shopping-carts/create`).then((response) => {
+      
+      axios.post(`${BASE_URL_CART}/v1/shopping-carts/create`).then((response) => {
           this.shoppingCartId = response.data.id;
       });
     },

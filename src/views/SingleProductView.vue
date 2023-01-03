@@ -109,7 +109,7 @@
 import ProductCard from '@/components/ProductCard.vue';
 import axios from 'axios';
 import moment from "moment/moment";
-import { BASE_URL_PRODUCTS } from "@/utils/constants.js";
+import { BASE_URL_CART, BASE_URL_PRODUCTS } from "@/utils/constants.js";
 
 export default {
     data() {
@@ -233,9 +233,11 @@ export default {
         },
 
         addToCart() {
+            
             console.log('Add product ' + this.product.id + ' to cart.');
             console.log(this.shoppingCartId);
-            axios.put(`http://localhost:8082/v1/shopping-carts/${this.shoppingCartId}`, {
+            
+            axios.put(`${BASE_URL_CART}/shopping-carts/${this.shoppingCartId}`, {
                 productId: this.product.id,
                 quantity: 1
             }).then((response) => {

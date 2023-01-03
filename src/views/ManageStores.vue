@@ -119,14 +119,14 @@
 
 <script>
 import ProductCard from '@/components/ProductCard.vue';
-import { BASE_URL_PRODUCTS } from "@/utils/constants.js"
+import { BASE_URL_STORE } from "@/utils/constants.js"
 import axios from 'axios';
 
 export default {
     data() {
         return {
             items: [],
-            endpoint: "http://localhost:8080/store-catalog/graphql/",
+            endpoint: `${BASE_URL_STORE}/store-catalog/graphql/`,
             editedItem: {
 
             }

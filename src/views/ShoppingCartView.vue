@@ -1,4 +1,5 @@
 <script>
+import { BASE_URL_CART } from '@/utils/constants';
 import axios from 'axios';
 
 export default {
@@ -10,13 +11,13 @@ export default {
     },
     methods: {
         getShoppingCart(shoppingCartId) {
-            axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`).then((response) => {
+            axios.get(`${BASE_URL_CART}/shopping-carts/${shoppingCartId}`).then((response) => {
                 this.items = response.data.products;
                 this.loadShoppingCartPrices();
             });
         },
         updateProductInShoppingCart(shoppingCartId, productId, quantity) {
-            axios.put(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}`, {
+            axios.put(`${BASE_URL_CART}/v1/shopping-carts/${shoppingCartId}`, {
                 productId: productId,
                 quantity: quantity
             }).then((response) => {
@@ -25,7 +26,7 @@ export default {
             });
         },
         getShoppingCartPrices(shoppingCartId) {
-            axios.get(`http://localhost:8082/v1/shopping-carts/${shoppingCartId}/prices`)
+            axios.get(`${BASE_URL_CART}/v1/shopping-carts/${shoppingCartId}/prices`)
                 .then((response) => {
                     this.prices = response.data;
                     this.loadShoppingCartPrices();
